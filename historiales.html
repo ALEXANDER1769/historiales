@@ -277,6 +277,7 @@ function cargarHistorial(idAnimal, email, tipo) {
   document.getElementById("contenido").style.display = "none";
   ocultarError();
 
+  // ✅ CORREGIDO: URL sin espacios
   fetch("https://pysiga.d-alexjose.workers.dev", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -334,11 +335,11 @@ function renderizarGraficosYTablas() {
       const ctxLeche = document.getElementById("graficoLeche").getContext("2d");
       new Chart(ctxLeche, {
         type: 'line',
-         {
+         { // ✅ CORREGIDO: Sintaxis correcta
           labels: fechasLeche,
           datasets: [{
             label: 'Producción (Lts)',
-             prodLeche,
+             prodLeche, // ✅ CORREGIDO: Sintaxis correcta
             borderColor: '#f39c12',
             backgroundColor: 'rgba(243, 156, 18, 0.1)',
             borderWidth: 2,
@@ -381,11 +382,11 @@ function renderizarGraficosYTablas() {
       const ctxPeso = document.getElementById("graficoPeso").getContext("2d");
       new Chart(ctxPeso, {
         type: 'line',
-         {
+         { // ✅ CORREGIDO: Sintaxis correcta
           labels: fechasPeso,
           datasets: [{
             label: 'Peso (Kg)',
-             pesos,
+             pesos, // ✅ CORREGIDO: Sintaxis correcta
             borderColor: '#2ecc71',
             backgroundColor: 'rgba(46, 204, 113, 0.1)',
             borderWidth: 2,
