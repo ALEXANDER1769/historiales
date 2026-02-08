@@ -1,23 +1,17 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Redirigiendo...</title>
+<head><meta charset="utf-8"><title>Redirigiendo...</title></head>
+<body>
   <script>
-    // Extraer parámetros de la URL
     const params = new URLSearchParams(window.location.search);
     const email = params.get("email");
     const tipo = params.get("tipo");
-
-    // Redirigir a la página real (que sí está en Cloudflare Pages)
     if (email && tipo) {
+      // Redirige a la página real de historiales
       window.location.href = `https://historiales.pages.dev/historiales.html?email=${encodeURIComponent(email)}&tipo=${encodeURIComponent(tipo)}`;
     } else {
-      document.body.innerHTML = "<h2>Error: Parámetros faltantes</h2>";
+      document.body.innerHTML = "<h3>Error: parámetros faltantes</h3>";
     }
   </script>
-</head>
-<body>
-  <p>Redirigiendo...</p>
 </body>
 </html>
