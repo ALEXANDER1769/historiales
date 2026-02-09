@@ -328,81 +328,84 @@ tbody.innerHTML = '<tr><td colspan="3">Sin registros</td></tr>';
 }
 }
 
+// ✅ FUNCIÓN CORREGIDA: graficarDatos
 function graficarDatos(canvasId, datos, labelY, tipo, labelX = "Fecha") {
-const canvasElement = document.getElementById(canvasId);
+  const canvasElement = document.getElementById(canvasId);
 
-// Verificar si el elemento canvas existe y es realmente un canvas
-if (!canvasElement || canvasElement.tagName !== 'CANVAS') {
-console.error(`Elemento con ID '${canvasId}' no encontrado o no es un <canvas>.`);
-return;
-}
+  // Verificar si el elemento canvas existe y es realmente un canvas
+  if (!canvasElement || canvasElement.tagName !== 'CANVAS') {
+    console.error(`Elemento con ID '${canvasId}' no encontrado o no es un <canvas>.`);
+    return;
+  }
 
-// Destruir instancia anterior si existe para este canvas
-let chartInstanceKey = `myChart${canvasId.charAt(0).toUpperCase() + canvasId.slice(1)}`;
-if (window[chartInstanceKey]) {
-window[chartInstanceKey].destroy();
-}
+  // Destruir instancia anterior si existe para este canvas
+  let chartInstanceKey = `myChart${canvasId.charAt(0).toUpperCase() + canvasId.slice(1)}`;
+  if (window[chartInstanceKey]) {
+    window[chartInstanceKey].destroy();
+  }
 
-// Asegurar que el contenedor del canvas (graficoContainer) esté visible
-// Esto es crítico para que Chart.js calcule dimensiones correctamente
-const parentContainer = canvasElement.parentElement; // Debería ser 'graficoLeche' o 'graficoPeso'
-if (parentContainer) {
-parentContainer.style.display = 'block'; // Asegura visibilidad
-} else {
-console.error(`Contenedor padre del canvas '${canvasId}' no encontrado.`);
-return;
-}
+  // Asegurar que el contenedor del canvas (graficoContainer) esté visible
+  const parentContainer = canvasElement.parentElement;
+  if (parentContainer) {
+    parentContainer.style.display = 'block';
+  } else {
+    console.error(`Contenedor padre del canvas '${canvasId}' no encontrado.`);
+    return;
+  }
 
-const ctx = canvasElement.getContext('2d');
-if (!ctx) {
-console.error(`No se pudo obtener el contexto 2D para el canvas '${canvasId}'.`);
-return;
-}
+  const ctx = canvasElement.getContext('2d');
+  if (!ctx) {
+    console.error(`No se pudo obtener el contexto 2D para el canvas '${canvasId}'.`);
+    return;
+  }
 
-const dataForChart = {
-labels: datos.map(d => d.fecha),
-datasets: [{
-label: labelY,
-data: datos.map(d => d[labelY.toLowerCase().replace(/\s/g, '')]), // Asigna valor dinámicamente, ej: 'produccion' o 'peso'
-borderColor: 'rgb(75, 192, 192)',
-backgroundColor: 'rgba(75, 192, 192, 0.2)',
-fill: false,
-}]
-};
-const config = {
-type: tipo, // 'line', 'bar', etc
-  dataForChart,
-options: {
-responsive: true,
-maintainAspectRatio: false, // Permitir que el canvas se ajuste al contenedor
-plugins: {
-legend: {
-position: 'top',
-},
-tooltip: {
-mode: 'index',
-intersect: false
-}
-},
-scales: {
-x: {
-display: true,
-title: {
-display: true,
-text: labelX
-}
-},
-y: {
-display: true,
-title: {
-display: true,
-text: labelY
-}
-}
-}
-}
-};
-window[chartInstanceKey] = new Chart(ctx, config);
+  // ✅ CORRECCIÓN CLAVE: Usar 'data' en lugar de 'dataForChart'
+  const chartData = {
+    labels: datos.map(d => d.fecha),
+    datasets: [{
+      label: labelY,
+      data: datos.map(d => d[labelY.toLowerCase().replace(/\s/g, '')]), // Ej: 'produccion' o 'peso'
+      borderColor: 'rgb(75, 192, 192)',
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      fill: false,
+    }]
+  };
+
+  const config = {
+    type: tipo, // 'line', 'bar', etc
+    data: chartData, // ✅ CORREGIDO: Clave 'data'
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      },
+      scales: {
+        x: {
+          display: true,
+          title: {
+            display: true,
+            text: labelX
+          }
+        },
+        y: {
+          display: true,
+          title: {
+            display: true,
+            text: labelY
+          }
+        }
+      }
+    }
+  };
+
+  window[chartInstanceKey] = new Chart(ctx, config);
 }
 
 // Ocultar loader inicial y mostrar contenido si ya hay email
