@@ -79,12 +79,14 @@ background: #1a3c5a;
 width: 100%;
 height: 400px;
 margin-top: 20px;
+display: none; /* Oculto por defecto */
 }
 .tabla-historial {
 width: 100%;
 border-collapse: collapse;
 font-size: 13px;
 margin-top: 15px;
+display: none; /* Oculto por defecto */
 }
 .tabla-historial th {
 background: var(--verde);
@@ -164,6 +166,7 @@ to { transform: translateX(5px); }
 
 <div id="historialSanitario" class="card" style="display: none;">
 <h3>Historial Sanitario</h3>
+<!-- No hay gráfico para sanitario -->
 <table id="tablaSanitario" class="tabla-historial">
 <thead><tr><th>Fecha</th><th>Tratamiento</th><th>Observaciones</th></tr></thead>
 <tbody></tbody>
@@ -240,30 +243,48 @@ document.getElementById("historialLeche").style.display = "none";
 document.getElementById("historialPeso").style.display = "none";
 document.getElementById("historialSanitario").style.display = "none";
 
+// Destruir gráficos anteriores si existen
+if (window.myChartLeche) {
+window.myChartLeche.destroy();
+window.myChartLeche = null;
+}
+if (window.myChartPeso) {
+window.myChartPeso.destroy();
+window.myChartPeso = null;
+}
+
 // Mostrar y actualizar historial de Leche
 if (historial.leche && historial.leche.length > 0) {
 document.getElementById("historialLeche").style.display = "block";
 renderizarTabla("tablaLeche", historial.leche);
+document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla
 graficarDatos("graficoLeche", historial.leche, "Producción (L)", "line", "Fecha");
+document.getElementById("graficoLeche").style.display = "block"; // Mostrar gráfico DESPUÉS de crearlo
 } else {
 document.getElementById("tablaLeche").querySelector("tbody").innerHTML = '<tr><td colspan="3">No se encontraron registros de producción de leche.</td></tr>';
+document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla de "no encontrado"
 }
 
 // Mostrar y actualizar historial de Peso
 if (historial.peso && historial.peso.length > 0) {
 document.getElementById("historialPeso").style.display = "block";
 renderizarTabla("tablaPeso", historial.peso);
+document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla
 graficarDatos("graficoPeso", historial.peso, "Peso (Kg)", "line", "Fecha");
+document.getElementById("graficoPeso").style.display = "block"; // Mostrar gráfico DESPUÉS de crearlo
 } else {
 document.getElementById("tablaPeso").querySelector("tbody").innerHTML = '<tr><td colspan="2">No se encontraron registros de peso.</td></tr>';
+document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla de "no encontrado"
 }
 
 // Mostrar y actualizar historial Sanitario
 if (historial.sanitario && historial.sanitario.length > 0) {
 document.getElementById("historialSanitario").style.display = "block";
 renderizarTabla("tablaSanitario", historial.sanitario);
+document.getElementById("tablaSanitario").style.display = "table"; // Mostrar tabla
 } else {
 document.getElementById("tablaSanitario").querySelector("tbody").innerHTML = '<tr><td colspan="3">No se encontraron registros sanitarios.</td></tr>';
+document.getElementById("tablaSanitario").style.display = "table"; // Mostrar tabla de "no encontrado"
 }
 
 document.getElementById("contenido").style.display = "block";
@@ -292,13 +313,25 @@ tbody.innerHTML = '<tr><td colspan="3">Sin registros</td></tr>';
 }
 
 function graficarDatos(containerId, datos, labelY, tipo, labelX = "Fecha") {
-const ctx = document.getElementById(containerId).getContext('2d');
-// Destruir instancia anterior si existe
-if (window.myCharts && window.myCharts[containerId]) {
-window.myCharts[containerId].destroy();
+const canvasElement = document.getElementById(containerId);
+// Verificar si el elemento existe antes de continuar
+if (!canvasElement) {
+console.error(`Elemento con ID '${containerId}' no encontrado en el DOM.`);
+return;
 }
-if (!window.myCharts) window.myCharts = {};
-const data = {
+// Destruir instancia anterior si existe
+let chartInstanceKey = `myChart${containerId.charAt(0).toUpperCase() + containerId.slice(1)}`;
+if (window[chartInstanceKey]) {
+window[chartInstanceKey].destroy();
+}
+
+const ctx = canvasElement.getContext('2d'); // Ahora debería funcionar si el elemento existe
+if (!ctx) {
+console.error(`No se pudo obtener el contexto 2D para el elemento '${containerId}'.`);
+return;
+}
+
+const dataForChart = {
 labels: datos.map(d => d.fecha),
 datasets: [{
 label: labelY,
@@ -310,7 +343,7 @@ fill: false,
 };
 const config = {
 type: tipo, // 'line', 'bar', etc
-data: data,
+ data: dataForChart,
 options: {
 responsive: true,
 plugins: {
@@ -340,7 +373,7 @@ text: labelY
 }
 }
 };
-window.myCharts[containerId] = new Chart(ctx, config);
+window[chartInstanceKey] = new Chart(ctx, config);
 }
 
 // Ocultar loader inicial y mostrar contenido si ya hay email
