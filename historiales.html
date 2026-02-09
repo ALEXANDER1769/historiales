@@ -148,7 +148,9 @@ to { transform: translateX(5px); }
 <!-- Contenedores para cada tipo de historial -->
 <div id="historialLeche" class="card" style="display: none;">
 <h3>Historial de Producción de Leche</h3>
-<div id="graficoLeche" class="grafico-container"></div>
+<div id="graficoLeche" class="grafico-container">
+<canvas id="canvasLeche"></canvas> <!-- Canvas hijo explícito -->
+</div>
 <table id="tablaLeche" class="tabla-historial">
 <thead><tr><th>Fecha</th><th>Producción (L)</th><th>Avío</th></tr></thead>
 <tbody></tbody>
@@ -157,7 +159,9 @@ to { transform: translateX(5px); }
 
 <div id="historialPeso" class="card" style="display: none;">
 <h3>Historial de Peso Corporal</h3>
-<div id="graficoPeso" class="grafico-container"></div>
+<div id="graficoPeso" class="grafico-container">
+<canvas id="canvasPeso"></canvas> <!-- Canvas hijo explícito -->
+</div>
 <table id="tablaPeso" class="tabla-historial">
 <thead><tr><th>Fecha</th><th>Peso (Kg)</th></tr></thead>
 <tbody></tbody>
@@ -238,28 +242,37 @@ alert(`Error al obtener historial: ${e.message}`);
 }
 
 function mostrarHistorial(historial) {
-// Resetear contenedores
+// Resetear contenedores y destruir gráficos anteriores
 document.getElementById("historialLeche").style.display = "none";
-document.getElementById("historialPeso").style.display = "none";
-document.getElementById("historialSanitario").style.display = "none";
-
-// Destruir gráficos anteriores si existen
 if (window.myChartLeche) {
 window.myChartLeche.destroy();
 window.myChartLeche = null;
 }
+document.getElementById("graficoLeche").style.display = "none"; // Asegurar ocultar gráfico
+document.getElementById("tablaLeche").style.display = "none"; // Asegurar ocultar tabla
+
+document.getElementById("historialPeso").style.display = "none";
 if (window.myChartPeso) {
 window.myChartPeso.destroy();
 window.myChartPeso = null;
 }
+document.getElementById("graficoPeso").style.display = "none"; // Asegurar ocultar gráfico
+document.getElementById("tablaPeso").style.display = "none"; // Asegurar ocultar tabla
+
+document.getElementById("historialSanitario").style.display = "none";
+document.getElementById("tablaSanitario").style.display = "none"; // Asegurar ocultar tabla
+
 
 // Mostrar y actualizar historial de Leche
 if (historial.leche && historial.leche.length > 0) {
 document.getElementById("historialLeche").style.display = "block";
 renderizarTabla("tablaLeche", historial.leche);
 document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla
-graficarDatos("graficoLeche", historial.leche, "Producción (L)", "line", "Fecha");
-document.getElementById("graficoLeche").style.display = "block"; // Mostrar gráfico DESPUÉS de crearlo
+document.getElementById("graficoLeche").style.display = "block"; // Mostrar contenedor gráfico ANTES de crear el chart
+// Esperar un tick para asegurar que el DOM esté listo
+setTimeout(() => {
+graficarDatos("canvasLeche", historial.leche, "Producción (L)", "line", "Fecha"); // Usar ID del CANVAS
+}, 0);
 } else {
 document.getElementById("tablaLeche").querySelector("tbody").innerHTML = '<tr><td colspan="3">No se encontraron registros de producción de leche.</td></tr>';
 document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla de "no encontrado"
@@ -270,8 +283,11 @@ if (historial.peso && historial.peso.length > 0) {
 document.getElementById("historialPeso").style.display = "block";
 renderizarTabla("tablaPeso", historial.peso);
 document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla
-graficarDatos("graficoPeso", historial.peso, "Peso (Kg)", "line", "Fecha");
-document.getElementById("graficoPeso").style.display = "block"; // Mostrar gráfico DESPUÉS de crearlo
+document.getElementById("graficoPeso").style.display = "block"; // Mostrar contenedor gráfico ANTES de crear el chart
+// Esperar un tick para asegurar que el DOM esté listo
+setTimeout(() => {
+graficarDatos("canvasPeso", historial.peso, "Peso (Kg)", "line", "Fecha"); // Usar ID del CANVAS
+}, 0);
 } else {
 document.getElementById("tablaPeso").querySelector("tbody").innerHTML = '<tr><td colspan="2">No se encontraron registros de peso.</td></tr>';
 document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla de "no encontrado"
@@ -312,22 +328,34 @@ tbody.innerHTML = '<tr><td colspan="3">Sin registros</td></tr>';
 }
 }
 
-function graficarDatos(containerId, datos, labelY, tipo, labelX = "Fecha") {
-const canvasElement = document.getElementById(containerId);
-// Verificar si el elemento existe antes de continuar
-if (!canvasElement) {
-console.error(`Elemento con ID '${containerId}' no encontrado en el DOM.`);
+function graficarDatos(canvasId, datos, labelY, tipo, labelX = "Fecha") {
+const canvasElement = document.getElementById(canvasId);
+
+// Verificar si el elemento canvas existe y es realmente un canvas
+if (!canvasElement || canvasElement.tagName !== 'CANVAS') {
+console.error(`Elemento con ID '${canvasId}' no encontrado o no es un <canvas>.`);
 return;
 }
-// Destruir instancia anterior si existe
-let chartInstanceKey = `myChart${containerId.charAt(0).toUpperCase() + containerId.slice(1)}`;
+
+// Destruir instancia anterior si existe para este canvas
+let chartInstanceKey = `myChart${canvasId.charAt(0).toUpperCase() + canvasId.slice(1)}`;
 if (window[chartInstanceKey]) {
 window[chartInstanceKey].destroy();
 }
 
-const ctx = canvasElement.getContext('2d'); // Ahora debería funcionar si el elemento existe
+// Asegurar que el contenedor del canvas (graficoContainer) esté visible
+// Esto es crítico para que Chart.js calcule dimensiones correctamente
+const parentContainer = canvasElement.parentElement; // Debería ser 'graficoLeche' o 'graficoPeso'
+if (parentContainer) {
+parentContainer.style.display = 'block'; // Asegura visibilidad
+} else {
+console.error(`Contenedor padre del canvas '${canvasId}' no encontrado.`);
+return;
+}
+
+const ctx = canvasElement.getContext('2d');
 if (!ctx) {
-console.error(`No se pudo obtener el contexto 2D para el elemento '${containerId}'.`);
+console.error(`No se pudo obtener el contexto 2D para el canvas '${canvasId}'.`);
 return;
 }
 
@@ -343,9 +371,10 @@ fill: false,
 };
 const config = {
 type: tipo, // 'line', 'bar', etc
- data: dataForChart,
+  dataForChart,
 options: {
 responsive: true,
+maintainAspectRatio: false, // Permitir que el canvas se ajuste al contenedor
 plugins: {
 legend: {
 position: 'top',
