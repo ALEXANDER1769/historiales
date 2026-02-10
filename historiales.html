@@ -1,421 +1,434 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Historiales de Animales - PYSIGA</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
 --verde: #2f6f4e;
---verde-claro: #e6f1eb;
 --azul: #2c4f7c;
---tierra: #8b6f47;
---rojo: #e74c3c;
---gris: #7f8c8d;
---morado: #9b59b6;
+--naranja: #f39c12;
 --fondo: #f7f9f8;
---blanco: #ffffff;
 }
 body {
-margin: 0;
-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+font-family: system-ui, Arial;
 background: var(--fondo);
-color: #333;
+margin: 0;
+padding: 20px;
 }
 .container {
-max-width: 1100px;
+max-width: 1200px;
 margin: auto;
-padding: 15px;
+background: white;
+border-radius: 12px;
+padding: 25px;
+box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
-.card {
-background: var(--blanco);
-border-radius: 10px;
-padding: 15px;
-box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-margin-bottom: 15px;
-}
-.header-titulo {
+h1 {
 color: var(--azul);
-font-size: 24px;
-margin: 0 0 15px 0; /* Espacio inferior */
-}
-.form-busqueda {
-display: flex;
-flex-wrap: wrap;
-gap: 10px;
 margin-bottom: 15px;
-align-items: end; /* Alinear elementos al final del flex container */
+text-align: center;
 }
-.form-busqueda input {
-padding: 8px 12px;
-font-size: 14px;
-border: 1px solid #ccc;
-border-radius: 4px;
-flex: 1;
-min-width: 200px;
+.form-section {
+background-color: #f0f7ff;
+padding: 20px;
+border-radius: 10px;
+margin-bottom: 25px;
+text-align: center;
 }
-.form-busqueda button {
-padding: 8px 16px;
-font-size: 14px;
+label {
+font-weight: bold;
+margin-right: 10px;
+color: var(--azul);
+}
+select, input[type="text"] {
+padding: 10px;
+border: 2px solid var(--naranja);
+border-radius: 6px;
+font-size: 16px;
+margin: 0 10px;
+}
+button {
+background: var(--naranja);
+color: white;
 border: none;
-border-radius: 4px;
+padding: 10px 20px;
+border-radius: 6px;
 cursor: pointer;
+font-size: 16px;
+font-weight: bold;
 }
-.btn-buscar {
-background: var(--azul);
-color: white;
+button:hover {
+background: #e67e22;
 }
-.btn-cerrar-form {
-background: var(--rojo);
-color: white;
+.section {
+margin-bottom: 30px;
 }
-.btn-cerrar-form:hover {
-background: #c0392b;
-}
-.btn-buscar:hover {
-background: #1a3c5a;
+.section h2 {
+color: var(--azul);
+border-left: 4px solid var(--naranja);
+padding-left: 12px;
+margin-bottom: 15px;
 }
 .grafico-container {
-width: 100%;
-height: 400px;
-margin-top: 20px;
-display: none; /* Oculto por defecto */
+background: white;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+margin-bottom: 25px;
 }
-.tabla-historial {
+canvas {
+max-width: 100%;
+height: 300px !important;
+}
+#tablaLeche, #tablaPeso, #tablaSanitario {
 width: 100%;
 border-collapse: collapse;
-font-size: 13px;
-margin-top: 15px;
-display: none; /* Oculto por defecto */
+margin-top: 10px;
 }
-.tabla-historial th {
-background: var(--verde);
-color: white;
-padding: 6px;
-position: sticky;
-top: 0;
-}
-.tabla-historial td {
-padding: 6px;
-border-bottom: 1px solid #ddd;
+#tablaLeche th, #tablaLeche td, #tablaPeso th, #tablaPeso td, #tablaSanitario th, #tablaSanitario td {
+border: 1px solid #ccc;
+padding: 8px;
 text-align: left;
 }
-/* === LOADER === */
-#loader {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-height: 100vh;
-background: white;
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-z-index: 9999;
+#tablaLeche th, #tablaPeso th, #tablaSanitario th {
+background-color: #f2f2f2;
 }
-.vaca-loader {
+#loader {
+text-align: center;
+padding: 60px 20px;
+font-size: 20px;
+color: var(--azul);
+}
+.vaca {
 font-size: 60px;
-margin-bottom: 16px;
-animation: mover 1s infinite alternate;
+animation: mover 1.2s infinite alternate;
+margin-bottom: 20px;
 }
 @keyframes mover {
-from { transform: translateX(-5px); }
-to { transform: translateX(5px); }
+from { transform: translateX(-8px) rotate(-5deg); }
+to { transform: translateX(8px) rotate(5deg); }
+}
+.btn-volver {
+background: var(--azul);
+color: white;
+border: none;
+padding: 12px 24px;
+border-radius: 8px;
+cursor: pointer;
+margin: 30px auto 0;
+font-size: 16px;
+display: block;
+font-weight: bold;
+transition: all 0.2s;
+}
+.btn-volver:hover {
+background: #1e3a5f;
+transform: translateY(-2px);
+box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.btn-volver:active {
+transform: translateY(0);
+}
+.error {
+color: #c0392b;
+padding: 20px;
+background: #fadbd8;
+border-radius: 10px;
+margin: 30px 0;
+text-align: center;
+font-size: 16px;
+display: none;
+border-left: 4px solid #c0392b;
 }
 </style>
 </head>
 <body>
-<div id="loader">
-<div class="vaca-loader">🐄</div>
-<div id="loader-text">Cargando historiales…</div>
-</div>
-
-<div id="contenido" style="display: none;">
 <div class="container">
-<h1 class="header-titulo">Historiales de Animales</h1>
-
-<div class="card">
-<h3>Buscar Historial</h3>
-<form id="formBusqueda" class="form-busqueda">
-<input type="text" id="inputIdAnimal" placeholder="Ingrese ID o Número Práctico del animal" required>
-<button type="button" class="btn-cerrar-form" onclick="cerrarVentana()">Cerrar</button> <!-- Botón de cierre -->
-<button type="submit" class="btn-buscar">Buscar Historial</button>
-</form>
+<h1 id="tituloHistorial">📋 Historiales de Animales</h1>
+<div id="formularioLeche" class="form-section" style="display: none;">
+<label for="tipoVaca">Tipo de Vaca:</label>
+<select id="tipoVaca">
+<option value="">Seleccione...</option>
+<option value="VACA PARIDA VACÍA">VACA PARIDA VACÍA</option>
+<option value="VACA PARIDA GESTANTE">VACA PARIDA GESTANTE</option>
+</select>
+<br><br>
+<label for="inputIdAnimal">ID del Animal:</label>
+<input type="text" id="inputIdAnimal" placeholder="Ej: 111111111111111">
+<br><br>
+<label for="inputNumPractico">Número Práctico:</label>
+<input type="text" id="inputNumPractico" placeholder="Ej: 111">
+<br><br>
+<button id="btnBuscar">🔍 Buscar Historial de Leche</button>
 </div>
-
-<!-- Contenedores para cada tipo de historial -->
-<div id="historialLeche" class="card" style="display: none;">
-<h3>Historial de Producción de Leche</h3>
-<div id="graficoLeche" class="grafico-container">
-<canvas id="canvasLeche"></canvas> <!-- Canvas hijo explícito -->
+<div id="loader" style="display: none;">
+<div class="vaca">🐄</div>
+<div>Buscando historial del animal...</div>
 </div>
-<table id="tablaLeche" class="tabla-historial">
-<thead><tr><th>Fecha</th><th>Producción (L)</th><th>Avío</th></tr></thead>
+<div id="contenido" style="display:none">
+<div id="seccionLeche" class="section">
+<h2>📈 Producción de Leche</h2>
+<div class="grafico-container">
+<canvas id="graficoLeche"></canvas>
+</div>
+<table id="tablaLeche">
+<thead>
+<tr><th>Fecha</th><th>Producción (Lts)</th><th>Avío</th></tr>
+</thead>
 <tbody></tbody>
 </table>
 </div>
-
-<div id="historialPeso" class="card" style="display: none;">
-<h3>Historial de Peso Corporal</h3>
-<div id="graficoPeso" class="grafico-container">
-<canvas id="canvasPeso"></canvas> <!-- Canvas hijo explícito -->
+<div id="seccionPeso" class="section">
+<h2>⚖️ Control de Peso</h2>
+<div class="grafico-container">
+<canvas id="graficoPeso"></canvas>
 </div>
-<table id="tablaPeso" class="tabla-historial">
-<thead><tr><th>Fecha</th><th>Peso (Kg)</th></tr></thead>
+<table id="tablaPeso">
+<thead>
+<tr><th>Fecha</th><th>Peso (Kg)</th></tr>
+</thead>
 <tbody></tbody>
 </table>
 </div>
-
-<div id="historialSanitario" class="card" style="display: none;">
-<h3>Historial Sanitario</h3>
-<!-- No hay gráfico para sanitario -->
-<table id="tablaSanitario" class="tabla-historial">
-<thead><tr><th>Fecha</th><th>Tratamiento</th><th>Observaciones</th></tr></thead>
+<div id="seccionSanitario" class="section">
+<h2>⚕️ Registro Sanitario</h2>
+<table id="tablaSanitario">
+<thead>
+<tr><th>Fecha</th><th>Tratamiento</th><th>Observaciones</th></tr>
+</thead>
 <tbody></tbody>
 </table>
 </div>
-
+<button class="btn-volver" id="btnVolver">⬅ Volver al panel</button>
 </div>
+<div id="error" class="error"></div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const WORKER_URL = "https://pysiga.d-alexjose.workers.dev"; // Asegúrate que sea tu URL correcta
-const urlParams = new URLSearchParams(window.location.search);
-const email = urlParams.get('email');
+let datosHistorial = {};
+let tipoHistorialActual = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+const params = new URLSearchParams(window.location.search);
+const email = params.get("email");
+tipoHistorialActual = params.get("tipo") || 'general';
 
 if (!email) {
-alert("Parámetro 'email' no encontrado en la URL.");
-location.href = "/"; // O redirige a donde corresponda
-}
-
-// Función para cerrar la ventana actual
-function cerrarVentana() {
-window.close();
-// Si window.close() no funciona por restricciones del navegador, puedes intentar redirigir a una página vacía o al panel principal si lo tienes como referer.
-// history.back(); // Esto vuelve a la página anterior, puede no ser deseable si fue abierta con window.open
-// location.href = 'https://tu-panel-principal.com'; // Reemplaza con tu URL real
-}
-
-document.getElementById("formBusqueda").addEventListener("submit", async (e) => {
-e.preventDefault();
-const idAnimal = document.getElementById("inputIdAnimal").value.trim();
-if (!idAnimal) {
-alert("Por favor ingrese un ID o Número Práctico.");
+mostrarError("Acceso no autorizado. Inicie sesión desde el panel principal.");
 return;
 }
-await buscarHistorial(idAnimal);
+
+// Actualizar título según el tipo
+const titulo = document.getElementById('tituloHistorial');
+switch(tipoHistorialActual) {
+case 'leche':
+titulo.textContent = '📋 Historial de Producción de Leche';
+document.getElementById('formularioLeche').style.display = 'block';
+document.getElementById('seccionPeso').style.display = 'none';
+document.getElementById('seccionSanitario').style.display = 'none';
+break;
+case 'peso':
+titulo.textContent = '📋 Historial de Peso Corporal';
+break;
+case 'sanitario':
+titulo.textContent = '📋 Historial Sanitario';
+break;
+default:
+titulo.textContent = '📋 Historiales de Animales';
+}
+
+const btnBuscar = document.getElementById("btnBuscar");
+const btnVolver = document.getElementById("btnVolver");
+
+if (tipoHistorialActual === 'leche') {
+btnBuscar.addEventListener("click", function() {
+const tipoVaca = document.getElementById("tipoVaca").value;
+const idAnimal = document.getElementById("inputIdAnimal").value.trim();
+const numPractico = document.getElementById("inputNumPractico").value.trim();
+
+if (!tipoVaca || (!idAnimal && !numPractico)) {
+mostrarError("Por favor complete todos los campos.");
+return;
+}
+
+// Combinar ID y número práctico en un solo identificador para la búsqueda
+const identificador = idAnimal || numPractico;
+cargarHistorial(identificador, email, 'leche');
+});
+}
+
+btnVolver.addEventListener("click", function() {
+window.close();
+});
 });
 
-async function buscarHistorial(idAnimal) {
-try {
-document.getElementById("loader-text").textContent = "Buscando historial...";
-document.getElementById("loader").style.display = "flex";
+function cargarHistorial(idAnimal, email, tipo) {
+document.getElementById("loader").style.display = "block";
+document.getElementById("contenido").style.display = "none";
+ocultarError();
 
-const res = await fetch(WORKER_URL, {
+// ✅ CORREGIDO: URL sin espacios
+fetch("https://pysiga.d-alexjose.workers.dev", {
 method: "POST",
 headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-accion: "obtenerHistorialAnimal",
-email: email,
-idAnimal: idAnimal // Enviar el ID/Número Práctico tal cual
+body: JSON.stringify({ accion: "obtenerHistorialAnimal", email: email, idAnimal: idAnimal })
 })
-});
-const data = await res.json();
-
-document.getElementById("loader").style.display = "none";
-
-if (!data.ok) {
-throw new Error(data.error || "Error desconocido");
-}
-
-// Mostrar resultados
-mostrarHistorial(data.historial);
-
+.then(response => {
+if (!response.ok) throw new Error("Error del servidor: " + response.status);
+return response.text();
+})
+.then(text => {
+try {
+return JSON.parse(text);
 } catch (e) {
+console.error("Error parsing JSON:", text);
+throw new Error("Respuesta del servidor no válida.");
+}
+})
+.then(data => {
+console.log("Datos de historial recibidos:", data);
+if (!data.ok) {
+throw new Error(data.error || "Error desconocido del servidor.");
+}
+datosHistorial = data.historial;
+renderizarGraficosYTablas();
 document.getElementById("loader").style.display = "none";
-console.error("Error:", e);
-alert(`Error al obtener historial: ${e.message}`);
-}
-}
-
-function mostrarHistorial(historial) {
-// Resetear contenedores y destruir gráficos anteriores
-document.getElementById("historialLeche").style.display = "none";
-if (window.myChartLeche) {
-window.myChartLeche.destroy();
-window.myChartLeche = null;
-}
-document.getElementById("graficoLeche").style.display = "none"; // Asegurar ocultar gráfico
-document.getElementById("tablaLeche").style.display = "none"; // Asegurar ocultar tabla
-
-document.getElementById("historialPeso").style.display = "none";
-if (window.myChartPeso) {
-window.myChartPeso.destroy();
-window.myChartPeso = null;
-}
-document.getElementById("graficoPeso").style.display = "none"; // Asegurar ocultar gráfico
-document.getElementById("tablaPeso").style.display = "none"; // Asegurar ocultar tabla
-
-document.getElementById("historialSanitario").style.display = "none";
-document.getElementById("tablaSanitario").style.display = "none"; // Asegurar ocultar tabla
-
-
-// Mostrar y actualizar historial de Leche
-if (historial.leche && historial.leche.length > 0) {
-document.getElementById("historialLeche").style.display = "block";
-renderizarTabla("tablaLeche", historial.leche);
-document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla
-document.getElementById("graficoLeche").style.display = "block"; // Mostrar contenedor gráfico ANTES de crear el chart
-// Esperar un tick para asegurar que el DOM esté listo
-setTimeout(() => {
-graficarDatos("canvasLeche", historial.leche, "Producción (L)", "line", "Fecha"); // Usar ID del CANVAS
-}, 0);
-} else {
-document.getElementById("tablaLeche").querySelector("tbody").innerHTML = '<tr><td colspan="3">No se encontraron registros de producción de leche.</td></tr>';
-document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla de "no encontrado"
-}
-
-// Mostrar y actualizar historial de Peso
-if (historial.peso && historial.peso.length > 0) {
-document.getElementById("historialPeso").style.display = "block";
-renderizarTabla("tablaPeso", historial.peso);
-document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla
-document.getElementById("graficoPeso").style.display = "block"; // Mostrar contenedor gráfico ANTES de crear el chart
-// Esperar un tick para asegurar que el DOM esté listo
-setTimeout(() => {
-graficarDatos("canvasPeso", historial.peso, "Peso (Kg)", "line", "Fecha"); // Usar ID del CANVAS
-}, 0);
-} else {
-document.getElementById("tablaPeso").querySelector("tbody").innerHTML = '<tr><td colspan="2">No se encontraron registros de peso.</td></tr>';
-document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla de "no encontrado"
-}
-
-// Mostrar y actualizar historial Sanitario
-if (historial.sanitario && historial.sanitario.length > 0) {
-document.getElementById("historialSanitario").style.display = "block";
-renderizarTabla("tablaSanitario", historial.sanitario);
-document.getElementById("tablaSanitario").style.display = "table"; // Mostrar tabla
-} else {
-document.getElementById("tablaSanitario").querySelector("tbody").innerHTML = '<tr><td colspan="3">No se encontraron registros sanitarios.</td></tr>';
-document.getElementById("tablaSanitario").style.display = "table"; // Mostrar tabla de "no encontrado"
-}
-
 document.getElementById("contenido").style.display = "block";
+})
+.catch(err => {
+console.error("❌ Error:", err);
+mostrarError("Error al cargar el historial: " + err.message);
+document.getElementById("loader").style.display = "none";
+});
 }
 
-function renderizarTabla(id, datos) {
-const tbody = document.getElementById(id).querySelector("tbody");
-tbody.innerHTML = "";
-if (datos && datos.length > 0) {
-datos.forEach(row => {
+function renderizarGraficosYTablas() {
+// --- LECHES ---
+if (tipoHistorialActual === 'leche' || tipoHistorialActual === 'general') {
+const datosLeche = datosHistorial.leche;
+const tablaLeche = document.querySelector("#tablaLeche tbody");
+tablaLeche.innerHTML = '';
+
+datosLeche.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+datosLeche.forEach(r => {
 const tr = document.createElement("tr");
-// Ajustar según los campos de cada historial
-if (row.produccion !== undefined) { // Leche
-tr.innerHTML = `<td>${row.fecha}</td><td>${row.produccion}</td><td>${row.avio}</td>`;
-} else if (row.peso !== undefined) { // Peso
-tr.innerHTML = `<td>${row.fecha}</td><td>${row.peso}</td>`;
-} else if (row.tratamiento !== undefined) { // Sanitario
-tr.innerHTML = `<td>${row.fecha}</td><td>${row.tratamiento}</td><td>${row.observaciones}</td>`;
+tr.innerHTML = `<td>${r.fecha}</td><td>${r.produccion}</td><td>${r.avio}</td>`;
+tablaLeche.appendChild(tr);
+});
+
+if (datosLeche.length > 0) {
+const fechasLeche = datosLeche.map(r => r.fecha);
+const prodLeche = datosLeche.map(r => r.produccion);
+const ctxLeche = document.getElementById("graficoLeche").getContext("2d");
+
+new Chart(ctxLeche, {
+type: 'line',
+ { // ✅ CORREGIDO: Propiedad 'data' añadida
+labels: fechasLeche,
+datasets: [{
+label: 'Producción (Lts)',
+data: prodLeche, // ✅ CORREGIDO: Propiedad 'data' añadida al dataset
+borderColor: '#f39c12',
+backgroundColor: 'rgba(243, 156, 18, 0.1)',
+borderWidth: 2,
+fill: true,
+tension: 0.3,
+pointRadius: 4
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: { legend: { display: true } },
+scales: {
+y: { beginAtZero: true, title: { display: true, text: 'Litros' } },
+x: { title: { display: true, text: 'Fecha' }, grid: { display: false } }
 }
-tbody.appendChild(tr);
+}
 });
 } else {
-// Este caso se cubre en mostrarHistorial, pero por si acaso
-tbody.innerHTML = '<tr><td colspan="3">Sin registros</td></tr>';
+document.getElementById("graficoLeche").parentElement.innerHTML = "<p style='text-align:center;color:#999'>No hay datos de producción de leche.</p>";
 }
 }
 
-// ✅ FUNCIÓN CORREGIDA: graficarDatos
-function graficarDatos(canvasId, datos, labelY, tipo, labelX = "Fecha") {
-  const canvasElement = document.getElementById(canvasId);
+// --- PESOS ---
+if (tipoHistorialActual === 'peso' || tipoHistorialActual === 'general') {
+const datosPeso = datosHistorial.peso;
+const tablaPeso = document.querySelector("#tablaPeso tbody");
+tablaPeso.innerHTML = '';
 
-  // Verificar si el elemento canvas existe y es realmente un canvas
-  if (!canvasElement || canvasElement.tagName !== 'CANVAS') {
-    console.error(`Elemento con ID '${canvasId}' no encontrado o no es un <canvas>.`);
-    return;
-  }
-
-  // Destruir instancia anterior si existe para este canvas
-  let chartInstanceKey = `myChart${canvasId.charAt(0).toUpperCase() + canvasId.slice(1)}`;
-  if (window[chartInstanceKey]) {
-    window[chartInstanceKey].destroy();
-  }
-
-  // Asegurar que el contenedor del canvas (graficoContainer) esté visible
-  const parentContainer = canvasElement.parentElement;
-  if (parentContainer) {
-    parentContainer.style.display = 'block';
-  } else {
-    console.error(`Contenedor padre del canvas '${canvasId}' no encontrado.`);
-    return;
-  }
-
-  const ctx = canvasElement.getContext('2d');
-  if (!ctx) {
-    console.error(`No se pudo obtener el contexto 2D para el canvas '${canvasId}'.`);
-    return;
-  }
-
-  // ✅ CORRECCIÓN CLAVE: Usar 'data' en lugar de 'dataForChart'
-  const chartData = {
-    labels: datos.map(d => d.fecha),
-    datasets: [{
-      label: labelY,
-      data: datos.map(d => d[labelY.toLowerCase().replace(/\s/g, '')]), // Ej: 'produccion' o 'peso'
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      fill: false,
-    }]
-  };
-
-  const config = {
-    type: tipo, // 'line', 'bar', etc
-    data: chartData, // ✅ CORREGIDO: Clave 'data'
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top',
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false
-        }
-      },
-      scales: {
-        x: {
-          display: true,
-          title: {
-            display: true,
-            text: labelX
-          }
-        },
-        y: {
-          display: true,
-          title: {
-            display: true,
-            text: labelY
-          }
-        }
-      }
-    }
-  };
-
-  window[chartInstanceKey] = new Chart(ctx, config);
-}
-
-// Ocultar loader inicial y mostrar contenido si ya hay email
-document.addEventListener("DOMContentLoaded", () => {
-if (email) {
-document.getElementById("loader").style.display = "none";
-document.getElementById("contenido").style.display = "block";
-}
+datosPeso.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+datosPeso.forEach(r => {
+const tr = document.createElement("tr");
+tr.innerHTML = `<td>${r.fecha}</td><td>${r.peso}</td>`;
+tablaPeso.appendChild(tr);
 });
 
+if (datosPeso.length > 0) {
+const fechasPeso = datosPeso.map(r => r.fecha);
+const pesos = datosPeso.map(r => r.peso);
+const ctxPeso = document.getElementById("graficoPeso").getContext("2d");
+
+new Chart(ctxPeso, {
+type: 'line',
+ { // ✅ CORREGIDO: Propiedad 'data' añadida
+labels: fechasPeso,
+datasets: [{
+label: 'Peso (Kg)',
+ pesos, // ✅ CORREGIDO: Propiedad 'data' añadida al dataset
+borderColor: '#2ecc71',
+backgroundColor: 'rgba(46, 204, 113, 0.1)',
+borderWidth: 2,
+fill: true,
+tension: 0.3,
+pointRadius: 4
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: { legend: { display: true } },
+scales: {
+y: { beginAtZero: false, title: { display: true, text: 'Kilogramos' } },
+x: { title: { display: true, text: 'Fecha' }, grid: { display: false } }
+}
+}
+});
+} else {
+document.getElementById("graficoPeso").parentElement.innerHTML = "<p style='text-align:center;color:#999'>No hay datos de peso corporal.</p>";
+}
+}
+
+// --- SANITARIO ---
+if (tipoHistorialActual === 'sanitario' || tipoHistorialActual === 'general') {
+const datosSanitario = datosHistorial.sanitario;
+const tablaSanitario = document.querySelector("#tablaSanitario tbody");
+tablaSanitario.innerHTML = '';
+
+datosSanitario.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+datosSanitario.forEach(r => {
+const tr = document.createElement("tr");
+tr.innerHTML = `<td>${r.fecha}</td><td>${r.tratamiento}</td><td>${r.observaciones}</td>`;
+tablaSanitario.appendChild(tr);
+});
+
+if (datosSanitario.length === 0) {
+tablaSanitario.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay registros sanitarios.</td></tr>';
+}
+}
+}
+
+function mostrarError(mensaje) {
+document.getElementById("error").textContent = mensaje;
+document.getElementById("error").style.display = "block";
+}
+
+function ocultarError() {
+document.getElementById("error").style.display = "none";
+}
 </script>
 </body>
 </html>
+```
