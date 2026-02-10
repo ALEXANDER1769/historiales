@@ -37,14 +37,14 @@ margin-bottom: 15px;
 .header-titulo {
 color: var(--azul);
 font-size: 24px;
-margin: 0 0 15px 0; /* Espacio inferior */
+margin: 0 0 15px 0;
 }
 .form-busqueda {
 display: flex;
 flex-wrap: wrap;
 gap: 10px;
 margin-bottom: 15px;
-align-items: end; /* Alinear elementos al final del flex container */
+align-items: end;
 }
 .form-busqueda input {
 padding: 8px 12px;
@@ -79,14 +79,14 @@ background: #1a3c5a;
 width: 100%;
 height: 400px;
 margin-top: 20px;
-display: none; /* Oculto por defecto */
+display: none;
 }
 .tabla-historial {
 width: 100%;
 border-collapse: collapse;
 font-size: 13px;
 margin-top: 15px;
-display: none; /* Oculto por defecto */
+display: none;
 }
 .tabla-historial th {
 background: var(--verde);
@@ -100,7 +100,6 @@ padding: 6px;
 border-bottom: 1px solid #ddd;
 text-align: left;
 }
-/* === LOADER === */
 #loader {
 display: flex;
 flex-direction: column;
@@ -131,74 +130,68 @@ to { transform: translateX(5px); }
 <div class="vaca-loader">🐄</div>
 <div id="loader-text">Cargando historiales…</div>
 </div>
-
 <div id="contenido" style="display: none;">
 <div class="container">
 <h1 class="header-titulo">Historiales de Animales</h1>
-
 <div class="card">
 <h3>Buscar Historial</h3>
 <form id="formBusqueda" class="form-busqueda">
 <input type="text" id="inputIdAnimal" placeholder="Ingrese ID o Número Práctico del animal" required>
-<button type="button" class="btn-cerrar-form" onclick="cerrarVentana()">Cerrar</button> <!-- Botón de cierre -->
+<button type="button" class="btn-cerrar-form" onclick="cerrarVentana()">Cerrar</button>
 <button type="submit" class="btn-buscar">Buscar Historial</button>
 </form>
 </div>
-
-<!-- Contenedores para cada tipo de historial -->
 <div id="historialLeche" class="card" style="display: none;">
 <h3>Historial de Producción de Leche</h3>
 <div id="graficoLeche" class="grafico-container">
-<canvas id="canvasLeche"></canvas> <!-- Canvas hijo explícito -->
+<canvas id="canvasLeche"></canvas>
 </div>
 <table id="tablaLeche" class="tabla-historial">
 <thead><tr><th>Fecha</th><th>Producción (L)</th><th>Avío</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
-
 <div id="historialPeso" class="card" style="display: none;">
 <h3>Historial de Peso Corporal</h3>
 <div id="graficoPeso" class="grafico-container">
-<canvas id="canvasPeso"></canvas> <!-- Canvas hijo explícito -->
+<canvas id="canvasPeso"></canvas>
 </div>
 <table id="tablaPeso" class="tabla-historial">
 <thead><tr><th>Fecha</th><th>Peso (Kg)</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
-
 <div id="historialSanitario" class="card" style="display: none;">
 <h3>Historial Sanitario</h3>
-<!-- No hay gráfico para sanitario -->
 <table id="tablaSanitario" class="tabla-historial">
 <thead><tr><th>Fecha</th><th>Tratamiento</th><th>Observaciones</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
-
 </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const WORKER_URL = "https://pysiga.d-alexjose.workers.dev"; // Asegúrate que sea tu URL correcta
+const WORKER_URL = "https://pysiga.d-alexjose.workers.dev";
 const urlParams = new URLSearchParams(window.location.search);
 const email = urlParams.get('email');
-
 if (!email) {
 alert("Parámetro 'email' no encontrado en la URL.");
-location.href = "/"; // O redirige a donde corresponda
+location.href = "/";
 }
-
-// Función para cerrar la ventana actual
 function cerrarVentana() {
 window.close();
-// Si window.close() no funciona por restricciones del navegador, puedes intentar redirigir a una página vacía o al panel principal si lo tienes como referer.
-// history.back(); // Esto vuelve a la página anterior, puede no ser deseable si fue abierta con window.open
-// location.href = 'https://tu-panel-principal.com'; // Reemplaza con tu URL real
+if (window.opener) {
+window.close();
+return;
 }
-
+const emailParam = urlParams.get('email');
+if (emailParam) {
+window.location.href = `https://sites.google.com/view/tu-sitio-pysiga?email=${encodeURIComponent(emailParam)}`;
+} else {
+window.location.href = 'https://sites.google.com/view/tu-sitio-pysiga';
+}
+}
 document.getElementById("formBusqueda").addEventListener("submit", async (e) => {
 e.preventDefault();
 const idAnimal = document.getElementById("inputIdAnimal").value.trim();
@@ -208,192 +201,159 @@ return;
 }
 await buscarHistorial(idAnimal);
 });
-
 async function buscarHistorial(idAnimal) {
 try {
 document.getElementById("loader-text").textContent = "Buscando historial...";
 document.getElementById("loader").style.display = "flex";
-
 const res = await fetch(WORKER_URL, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
 accion: "obtenerHistorialAnimal",
 email: email,
-idAnimal: idAnimal // Enviar el ID/Número Práctico tal cual
+idAnimal: idAnimal
 })
 });
 const data = await res.json();
-
 document.getElementById("loader").style.display = "none";
-
 if (!data.ok) {
 throw new Error(data.error || "Error desconocido");
 }
-
-// Mostrar resultados
 mostrarHistorial(data.historial);
-
 } catch (e) {
 document.getElementById("loader").style.display = "none";
 console.error("Error:", e);
 alert(`Error al obtener historial: ${e.message}`);
 }
 }
-
 function mostrarHistorial(historial) {
-// Resetear contenedores y destruir gráficos anteriores
 document.getElementById("historialLeche").style.display = "none";
 if (window.myChartLeche) {
 window.myChartLeche.destroy();
 window.myChartLeche = null;
 }
-document.getElementById("graficoLeche").style.display = "none"; // Asegurar ocultar gráfico
-document.getElementById("tablaLeche").style.display = "none"; // Asegurar ocultar tabla
-
+document.getElementById("graficoLeche").style.display = "none";
+document.getElementById("tablaLeche").style.display = "none";
 document.getElementById("historialPeso").style.display = "none";
 if (window.myChartPeso) {
 window.myChartPeso.destroy();
 window.myChartPeso = null;
 }
-document.getElementById("graficoPeso").style.display = "none"; // Asegurar ocultar gráfico
-document.getElementById("tablaPeso").style.display = "none"; // Asegurar ocultar tabla
-
+document.getElementById("graficoPeso").style.display = "none";
+document.getElementById("tablaPeso").style.display = "none";
 document.getElementById("historialSanitario").style.display = "none";
-document.getElementById("tablaSanitario").style.display = "none"; // Asegurar ocultar tabla
-
-
-// Mostrar y actualizar historial de Leche
+document.getElementById("tablaSanitario").style.display = "none";
 if (historial.leche && historial.leche.length > 0) {
 document.getElementById("historialLeche").style.display = "block";
 renderizarTabla("tablaLeche", historial.leche);
-document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla
-document.getElementById("graficoLeche").style.display = "block"; // Mostrar contenedor gráfico ANTES de crear el chart
-// Esperar un tick para asegurar que el DOM esté listo
+document.getElementById("tablaLeche").style.display = "table";
+document.getElementById("graficoLeche").style.display = "block";
 setTimeout(() => {
-graficarDatos("canvasLeche", historial.leche, "Producción (L)", "line", "Fecha"); // Usar ID del CANVAS
+graficarDatos("canvasLeche", historial.leche, "Producción (L)", "line", "Fecha");
 }, 0);
 } else {
 document.getElementById("tablaLeche").querySelector("tbody").innerHTML = '<tr><td colspan="3">No se encontraron registros de producción de leche.</td></tr>';
-document.getElementById("tablaLeche").style.display = "table"; // Mostrar tabla de "no encontrado"
+document.getElementById("tablaLeche").style.display = "table";
 }
-
-// Mostrar y actualizar historial de Peso
 if (historial.peso && historial.peso.length > 0) {
 document.getElementById("historialPeso").style.display = "block";
 renderizarTabla("tablaPeso", historial.peso);
-document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla
-document.getElementById("graficoPeso").style.display = "block"; // Mostrar contenedor gráfico ANTES de crear el chart
-// Esperar un tick para asegurar que el DOM esté listo
+document.getElementById("tablaPeso").style.display = "table";
+document.getElementById("graficoPeso").style.display = "block";
 setTimeout(() => {
-graficarDatos("canvasPeso", historial.peso, "Peso (Kg)", "line", "Fecha"); // Usar ID del CANVAS
+graficarDatos("canvasPeso", historial.peso, "Peso (Kg)", "line", "Fecha");
 }, 0);
 } else {
 document.getElementById("tablaPeso").querySelector("tbody").innerHTML = '<tr><td colspan="2">No se encontraron registros de peso.</td></tr>';
-document.getElementById("tablaPeso").style.display = "table"; // Mostrar tabla de "no encontrado"
+document.getElementById("tablaPeso").style.display = "table";
 }
-
-// Mostrar y actualizar historial Sanitario
 if (historial.sanitario && historial.sanitario.length > 0) {
 document.getElementById("historialSanitario").style.display = "block";
 renderizarTabla("tablaSanitario", historial.sanitario);
-document.getElementById("tablaSanitario").style.display = "table"; // Mostrar tabla
+document.getElementById("tablaSanitario").style.display = "table";
 } else {
 document.getElementById("tablaSanitario").querySelector("tbody").innerHTML = '<tr><td colspan="3">No se encontraron registros sanitarios.</td></tr>';
-document.getElementById("tablaSanitario").style.display = "table"; // Mostrar tabla de "no encontrado"
+document.getElementById("tablaSanitario").style.display = "table";
 }
-
 document.getElementById("contenido").style.display = "block";
 }
-
 function renderizarTabla(id, datos) {
 const tbody = document.getElementById(id).querySelector("tbody");
 tbody.innerHTML = "";
 if (datos && datos.length > 0) {
 datos.forEach(row => {
 const tr = document.createElement("tr");
-// Ajustar según los campos de cada historial
-if (row.produccion !== undefined) { // Leche
+if (row.produccion !== undefined) {
 tr.innerHTML = `<td>${row.fecha}</td><td>${row.produccion}</td><td>${row.avio}</td>`;
-} else if (row.peso !== undefined) { // Peso
+} else if (row.peso !== undefined) {
 tr.innerHTML = `<td>${row.fecha}</td><td>${row.peso}</td>`;
-} else if (row.tratamiento !== undefined) { // Sanitario
+} else if (row.tratamiento !== undefined) {
 tr.innerHTML = `<td>${row.fecha}</td><td>${row.tratamiento}</td><td>${row.observaciones}</td>`;
 }
 tbody.appendChild(tr);
 });
 } else {
-// Este caso se cubre en mostrarHistorial, pero por si acaso
 tbody.innerHTML = '<tr><td colspan="3">Sin registros</td></tr>';
 }
 }
-
-// ✅ FUNCIÓN CORREGIDA Y SIMPLIFICADA: graficarDatos
 function graficarDatos(canvasId, datos, labelY, tipo, labelX = "Fecha") {
-  const canvasElement = document.getElementById(canvasId);
-
-  if (!canvasElement || canvasElement.tagName !== 'CANVAS') {
-    console.error(`Elemento con ID '${canvasId}' no encontrado o no es un <canvas>.`);
-    return;
-  }
-
-  let chartInstanceKey = `myChart${canvasId.charAt(0).toUpperCase() + canvasId.slice(1)}`;
-  if (window[chartInstanceKey]) {
-    window[chartInstanceKey].destroy();
-  }
-
-  const parentContainer = canvasElement.parentElement;
-  if (parentContainer) {
-    parentContainer.style.display = 'block';
-  }
-
-  const ctx = canvasElement.getContext('2d');
-  if (!ctx) {
-    console.error(`No se pudo obtener el contexto 2D para el canvas '${canvasId}'.`);
-    return;
-  }
-
-  // ✅ CORRECCIÓN: Parsear explícitamente valores numéricos
-  const chartData = {
-    labels: datos.map(d => d.fecha),
-    datasets: [{
-      label: labelY,
-      // Convertir el valor a número con Number() y usar 0 como fallback
-       datos.map(d => Number(d[labelY.toLowerCase().replace(/\s/g, '')])),
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      fill: false,
-    }]
-  };
-
-  const config = {
-    type: tipo,
-     chartData, // ✅ Clave correcta
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top' },
-        tooltip: { mode: 'index', intersect: false }
-      },
-      scales: {
-        x: { display: true, title: { display: true, text: labelX } },
-        y: { display: true, title: { display: true, text: labelY } }
-      }
-    }
-  };
-
-  window[chartInstanceKey] = new Chart(ctx, config);
+const canvasElement = document.getElementById(canvasId);
+if (!canvasElement || canvasElement.tagName !== 'CANVAS') {
+console.error(`Elemento con ID '${canvasId}' no encontrado o no es un <canvas>.`);
+return;
 }
-
-// Ocultar loader inicial y mostrar contenido si ya hay email
+let chartInstanceKey = `myChart${canvasId.charAt(0).toUpperCase() + canvasId.slice(1)}`;
+if (window[chartInstanceKey]) {
+window[chartInstanceKey].destroy();
+}
+const parentContainer = canvasElement.parentElement;
+if (parentContainer) {
+parentContainer.style.display = 'block';
+}
+const ctx = canvasElement.getContext('2d');
+if (!ctx) {
+console.error(`No se pudo obtener el contexto 2D para el canvas '${canvasId}'.`);
+return;
+}
+const chartData = {
+labels: datos.map(d => d.fecha),
+datasets: [{
+label: labelY,
+data: datos.map(d => {
+if (d.produccion !== undefined) return Number(d.produccion);
+if (d.peso !== undefined) return Number(d.peso);
+return 0;
+}),
+borderColor: 'rgb(75, 192, 192)',
+backgroundColor: 'rgba(75, 192, 192, 0.2)',
+fill: false,
+tension: 0.3
+}]
+};
+const config = {
+type: tipo,
+data: chartData,
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: { position: 'top' },
+tooltip: { mode: 'index', intersect: false }
+},
+scales: {
+x: { display: true, title: { display: true, text: labelX } },
+y: { display: true, title: { display: true, text: labelY }, beginAtZero: true }
+}
+}
+};
+window[chartInstanceKey] = new Chart(ctx, config);
+}
 document.addEventListener("DOMContentLoaded", () => {
 if (email) {
 document.getElementById("loader").style.display = "none";
 document.getElementById("contenido").style.display = "block";
 }
 });
-
 </script>
 </body>
 </html>
